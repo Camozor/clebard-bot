@@ -6,7 +6,6 @@ import (
 	"github.com/joho/godotenv"
 	"golang.org/x/exp/slices"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -60,19 +59,31 @@ func handleUserMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func handleDogImageCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
-	response, err := http.Get("https://dog.ceo/api/breeds/image/random")
+	//response, err := http.Get("https://dog.ceo/api/breeds/image/random")
+	//
+	//if err != nil {
+	//	fmt.Println(err)
+	//}
+	//defer response.Body.Close()
 
+	var clebardPhoto = "https://images.dog.ceo/breeds/dhole/n02115913_564.jpg"
+	var messageEmbed = discordgo.MessageEmbed{Image: &discordgo.MessageEmbedImage{URL: clebardPhoto}}
+
+	var message = discordgo.MessageSend{Embeds: []*discordgo.MessageEmbed{&messageEmbed}}
+	_, err := s.ChannelMessageSendComplex(m.ChannelID, &message)
 	if err != nil {
 		fmt.Println(err)
+		fmt.Printf("Could not send image to server for channel %s", m.ChannelID)
+		return
 	}
-	defer response.Body.Close()
 
-	if response.StatusCode == 200 {
-		var message = discordgo.MessageSend{}
-		_, err := s.ChannelMessageSendComplex(m.ChannelID, &message)
-		if err != nil {
-			fmt.Printf("Could not send image to server for channel %s", m.ChannelID)
-			return
-		}
-	}
+	//if response.StatusCode == 200 {
+	//	var message = discordgo.MessageSend{Embeds: []*discordgo.MessageEmbed{&messageEmbed}}
+	//	_, err := s.ChannelMessageSendComplex(m.ChannelID, &message)
+	//	if err != nil {
+	//		fmt.Println(err)
+	//		fmt.Printf("Could not send image to server for channel %s", m.ChannelID)
+	//		return
+	//	}
+	//}
 }
