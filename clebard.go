@@ -7,7 +7,6 @@ import (
 	"github.com/joho/godotenv"
 	"golang.org/x/exp/slices"
 	"io/ioutil"
-	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -19,7 +18,7 @@ var dogCommandList = []string{"woof", "wouf", "ouaf", "whouaf", "wouaf"}
 func main() {
 	err := godotenv.Load()
 	if err != nil {
-		log.Fatal("Error loading .env file")
+		fmt.Println("Could not load .env file")
 	}
 	token := os.Getenv("DISCORD_TOKEN")
 
