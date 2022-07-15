@@ -1,4 +1,4 @@
 .idea
 .env
 
-clebard-bot
+bin/clebard-bot
