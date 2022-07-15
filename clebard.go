@@ -6,6 +6,7 @@ import (
 	"github.com/joho/godotenv"
 	"golang.org/x/exp/slices"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -19,8 +20,6 @@ func main() {
 		log.Fatal("Error loading .env file")
 	}
 	token := os.Getenv("DISCORD_TOKEN")
-
-	fmt.Println(token)
 
 	dg, err := discordgo.New("Bot " + token)
 
@@ -56,8 +55,24 @@ func handleUserMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 	}
 
 	if slices.Contains(dogCommandList, m.Content) {
-		fmt.Println("Contient")
-	} else {
-		fmt.Println("Contient pas")
+		handleDogImageCommand(s, m)
+	}
+}
+
+func handleDogImageCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
+	response, err := http.Get("https://dog.ceo/api/breeds/image/random")
+
+	if err != nil {
+		fmt.Println(err)
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode == 200 {
+		var message = discordgo.MessageSend{}
+		_, err := s.ChannelMessageSendComplex(m.ChannelID, &message)
+		if err != nil {
+			fmt.Printf("Could not send image to server for channel %s", m.ChannelID)
+			return
+		}
 	}
 }
