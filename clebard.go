@@ -6,7 +6,9 @@ import (
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 	"golang.org/x/exp/slices"
+	"io"
 	"io/ioutil"
+	"log"
 	"net/http"
 	"os"
 	"os/signal"
@@ -40,6 +42,9 @@ func main() {
 	}
 
 	fmt.Println("Bot is now running. Press CTRL-C to exit.")
+
+	fakeServer()
+
 	sc := make(chan os.Signal, 1)
 	signal.Notify(sc, syscall.SIGINT, syscall.SIGTERM, os.Interrupt, os.Kill)
 	<-sc
@@ -47,6 +52,18 @@ func main() {
 	err = dg.Close()
 	if err != nil {
 		return
+	}
+}
+
+func fakeServer() {
+	http.HandleFunc("/", func(writer http.ResponseWriter, request *http.Request) {
+		io.WriteString(writer, "UP")
+	})
+
+	//Use the default DefaultServeMux.
+	err := http.ListenAndServe(":8080", nil)
+	if err != nil {
+		log.Fatal(err)
 	}
 }
 
