@@ -60,8 +60,9 @@ func fakeServer() {
 		io.WriteString(writer, "UP")
 	})
 
+	port := os.Getenv("PORT")
 	//Use the default DefaultServeMux.
-	err := http.ListenAndServe(":8080", nil)
+	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Fatal(err)
 	}
