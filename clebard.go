@@ -1,11 +1,14 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/bwmarrin/discordgo"
 	"github.com/joho/godotenv"
 	"golang.org/x/exp/slices"
+	"io/ioutil"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -59,31 +62,40 @@ func handleUserMessage(s *discordgo.Session, m *discordgo.MessageCreate) {
 }
 
 func handleDogImageCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
-	//response, err := http.Get("https://dog.ceo/api/breeds/image/random")
-	//
-	//if err != nil {
-	//	fmt.Println(err)
-	//}
-	//defer response.Body.Close()
+	response, err := http.Get("https://dog.ceo/api/breeds/image/random")
 
-	var clebardPhoto = "https://images.dog.ceo/breeds/dhole/n02115913_564.jpg"
-	var messageEmbed = discordgo.MessageEmbed{Image: &discordgo.MessageEmbedImage{URL: clebardPhoto}}
-
-	var message = discordgo.MessageSend{Embeds: []*discordgo.MessageEmbed{&messageEmbed}}
-	_, err := s.ChannelMessageSendComplex(m.ChannelID, &message)
 	if err != nil {
 		fmt.Println(err)
-		fmt.Printf("Could not send image to server for channel %s", m.ChannelID)
-		return
+	}
+	defer response.Body.Close()
+
+	if response.StatusCode == 200 {
+
+		body, err := ioutil.ReadAll(response.Body)
+		if err != nil {
+			fmt.Println("Could not read body")
+			fmt.Println(err)
+			return
+		}
+
+		var clebardResponse = new(ClebardReponse)
+		err = json.Unmarshal(body, &clebardResponse)
+		if err != nil {
+			fmt.Println("Could not parse body")
+			fmt.Println(err)
+			return
+		}
+
+		fmt.Printf("Response = %s\n", clebardResponse.Message)
+
+		var messageEmbed = discordgo.MessageEmbed{Image: &discordgo.MessageEmbedImage{URL: clebardResponse.Message}}
+		var message = discordgo.MessageSend{Embeds: []*discordgo.MessageEmbed{&messageEmbed}}
+		_, err2 := s.ChannelMessageSendComplex(m.ChannelID, &message)
+		if err2 != nil {
+			fmt.Println(err2)
+			fmt.Printf("Could not send image to server for channel %s", m.ChannelID)
+			return
+		}
 	}
 
-	//if response.StatusCode == 200 {
-	//	var message = discordgo.MessageSend{Embeds: []*discordgo.MessageEmbed{&messageEmbed}}
-	//	_, err := s.ChannelMessageSendComplex(m.ChannelID, &message)
-	//	if err != nil {
-	//		fmt.Println(err)
-	//		fmt.Printf("Could not send image to server for channel %s", m.ChannelID)
-	//		return
-	//	}
-	//}
 }
