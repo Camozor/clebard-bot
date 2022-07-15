@@ -1,1 +1,1 @@
-worker: ./bin/clebard-bot
+web: ./bin/clebard-bot
