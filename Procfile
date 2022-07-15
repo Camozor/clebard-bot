@@ -1,1 +1,1 @@
-web: bin/clebard-bot
+worker: ls && ./clebard-bot
