@@ -70,26 +70,13 @@ func handleDogImageCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 	defer response.Body.Close()
 
 	if response.StatusCode == 200 {
-
-		body, err := ioutil.ReadAll(response.Body)
+		clebardResponse, err := parseDogResponse(response)
 		if err != nil {
-			fmt.Println("Could not read body")
-			fmt.Println(err)
 			return
 		}
-
-		var clebardResponse = new(ClebardReponse)
-		err = json.Unmarshal(body, &clebardResponse)
-		if err != nil {
-			fmt.Println("Could not parse body")
-			fmt.Println(err)
-			return
-		}
-
-		fmt.Printf("Response = %s\n", clebardResponse.Message)
 
 		var messageEmbed = discordgo.MessageEmbed{Image: &discordgo.MessageEmbedImage{URL: clebardResponse.Message}}
-		var message = discordgo.MessageSend{Embeds: []*discordgo.MessageEmbed{&messageEmbed}}
+		var message = discordgo.MessageSend{Content: "Wouf wouf !", Embeds: []*discordgo.MessageEmbed{&messageEmbed}}
 		_, err2 := s.ChannelMessageSendComplex(m.ChannelID, &message)
 		if err2 != nil {
 			fmt.Println(err2)
@@ -98,4 +85,22 @@ func handleDogImageCommand(s *discordgo.Session, m *discordgo.MessageCreate) {
 		}
 	}
 
+}
+
+func parseDogResponse(response *http.Response) (resp *ClebardReponse, err error) {
+	body, err := ioutil.ReadAll(response.Body)
+	if err != nil {
+		fmt.Println("Could not read body")
+		fmt.Println(err)
+		return
+	}
+
+	resp = new(ClebardReponse)
+	err = json.Unmarshal(body, &resp)
+	if err != nil {
+		fmt.Println("Could not parse body")
+		fmt.Println(err)
+		return
+	}
+	return resp, nil
 }
