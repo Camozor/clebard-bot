@@ -1,0 +1,1 @@
+worker: bin/perso/clebard-bot
